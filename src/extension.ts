@@ -1,26 +1,58 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import defaultConfig from "./defaultConfig";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+const {
+  env: { appRoot },
+  workspace: { fs },
+  Uri,
+  window
+} = vscode;
+const resolvePath = (pathName: string) =>
+  Uri.parse("file://" + "/" + appRoot + "/" + pathName);
+function transStrToUnit8(value: string) {
+  return new Uint8Array(Buffer.from(value));
+}
+
 export function activate(context: vscode.ExtensionContext) {
+  let componentName = "";
+  // The command has been defined in the package.json file
+  // Now provide the implementation of the command with registerCommand
+  // The commandId parameter must match the command field in package.json
+  let disposable = vscode.commands.registerCommand(
+    "extension.helloWorld",
+    async () => {
+      async function parseObject(obj: object, prePath: string) {
+        const entries = Object.entries(obj);
+        for (let [key, value] of entries) {
+          const pathName = prePath + "/" + key;
+          if (typeof value === "object") {
+            await parseObject(value, pathName);
+          } else {
+            const fileUri = resolvePath(replaceTemplate(pathName));
+            const data = transStrToUnit8(replaceTemplate(value));
+            await fs.writeFile(fileUri, data);
+          }
+        }
+      }
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "easy-component" is now active!');
+      function replaceTemplate(value: string): string {
+        return value.replace(/\${Name}/g, componentName);
+      }
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
+      const fileName = await window.showInputBox({
+        placeHolder: "会替换配置文件的${Name}",
+        prompt: "输入组件的名字"
+      });
+      if (fileName) {
+        componentName = fileName;
+        await parseObject(defaultConfig, "");
+        // Display a message box to the user
+        window.showInformationMessage("已为您创建文件!");
+      }
+    }
+  );
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World!');
-	});
-
-	context.subscriptions.push(disposable);
+  context.subscriptions.push(disposable);
 }
 
 // this method is called when your extension is deactivated

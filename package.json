@@ -1,18 +1,26 @@
 {
   "name": "easy-component",
   "displayName": "easy-component",
-  "description": "be easy to create the files where a component will exist",
-  "version": "0.0.1",
+  "description": "be easy to create your component structrue",
+  "version": "1.0.0",
   "engines": {
-    "vscode": "^1.0.0"
+    "vscode": "^1.41.0"
   },
   "categories": [
     "Other"
   ],
+  "publisher":"zem",
   "activationEvents": [
     "onCommand:extension.createComponent"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhanzizhen/easy-component.git"
+  },
+  "author": "zhanzizhen",
   "main": "./out/extension.js",
+  "icon": "images/cat.png",
+  "license": "MIT",
   "contributes": {
     "commands": [
       {
@@ -23,6 +31,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
+    "vsce:publish": "vsce publish",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile",

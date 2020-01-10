@@ -2,7 +2,7 @@
   "name": "easy-component",
   "displayName": "easy-component",
   "description": "be easy to create your component structrue",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "engines": {
     "vscode": "^1.41.0"
   },

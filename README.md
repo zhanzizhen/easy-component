@@ -36,3 +36,8 @@ Users appreciate release notes as you update your extension.
 2. 解决了文件生成位置的 bug
 3. 优化了交互体验
 4. 调整了代码结构
+
+### 1.1.0
+
+1. 优化代码架构
+2. 完善配置文件的默认配置

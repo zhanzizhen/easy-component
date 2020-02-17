@@ -13,8 +13,14 @@ function transStrToUnit8(value: string): Uint8Array {
   return new Uint8Array(Buffer.from(value));
 }
 
-function resolvePath(fileName: string): vscode.Uri {
-  return Uri.parse("file://" + "/" + workspace.rootPath + "/" + fileName);
+function resolvePath(fileName: string): vscode.Uri | never {
+  const { workspaceFolders } = workspace;
+  if (workspaceFolders === undefined) {
+    window.showErrorMessage("工作区不能为空");
+    throw new Error("workspaceFolders is empty");
+  }
+  const filePath: string = workspaceFolders[0].uri.toString() + "/" + fileName;
+  return Uri.parse(filePath);
 }
 
 // parse the config object to files
@@ -61,7 +67,7 @@ async function createFiles() {
     window.showTextDocument(firstFileUri, {
       preserveFocus: true
     });
-    window.showInformationMessage("已在根目录生成组件模板!");
+    window.showInformationMessage("已在根目录生成code + files");
   }
 }
 

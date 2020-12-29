@@ -4,8 +4,9 @@ import defaultConfigStr from "./defaultConfig";
 const { workspace, Uri, window } = vscode;
 // user's input name
 let componentName = "";
+type Config = { [key: string]: string | ((v: string) => string) | Config };
 // easy-component.config.js
-let config = {};
+let configFunc: (v: string) => Config;
 // the first file we create
 let firstFileUri: vscode.Uri;
 
@@ -24,34 +25,36 @@ function resolvePath(fileName: string): vscode.Uri | never {
 }
 
 // parse the config object to files
-async function parseObject(obj: object, prePath: string) {
+async function parseObject(obj: Config, prePath: string) {
   const entries = Object.entries(obj);
   for (const [key, value] of entries) {
     const pathName = prePath + "/" + key;
-    if (typeof value === "object") {
-      await parseObject(value, pathName);
-    } else {
-      const fileUri = resolvePath(replaceTemplate(pathName));
-      const data = transStrToUnit8(replaceTemplate(value));
+    if (typeof value === "function" || typeof value === "string") {
+      const fileUri = resolvePath(pathName);
+      const data = transStrToUnit8(
+        typeof value === "function" ? getFileContentByFunction(value) : value
+      );
       if (!firstFileUri) {
         firstFileUri = fileUri;
       }
       await workspace.fs.writeFile(fileUri, data);
+    } else {
+      await parseObject(value, pathName);
     }
   }
 }
 
-function replaceTemplate(value: string): string {
-  return value.replace(/{{Name}}/g, componentName);
+function getFileContentByFunction(fn: (v: string) => string): string {
+  return fn(componentName);
 }
 
-async function onMissingConfigFile(e: any) {
+async function onConfigFileError(e: any) {
   // easy-component.config is not found
   if (e.code === "MODULE_NOT_FOUND") {
     const fileUri = resolvePath("easy-component.config.js");
     await workspace.fs.writeFile(fileUri, transStrToUnit8(defaultConfigStr));
     await window.showTextDocument(fileUri, {
-      preserveFocus: true
+      preserveFocus: true,
     });
     window.showErrorMessage("请先配置easy-component.config.js");
   } else {
@@ -61,30 +64,42 @@ async function onMissingConfigFile(e: any) {
 
 // create components files now
 async function createFiles() {
-  await parseObject(config, "");
+  await parseObject(configFunc(componentName), "");
   if (firstFileUri) {
     // after creating files, make the vscode window focus on the frist created file
     window.showTextDocument(firstFileUri, {
-      preserveFocus: true
+      preserveFocus: true,
     });
-    window.showInformationMessage("已在根目录生成code + files");
+    window.showInformationMessage("已在当前根目录生成组件模板，请查看");
   }
 }
 
 async function handleAfterRegisterCommand() {
+  const { workspaceFolders } = workspace;
+  if (workspaceFolders === undefined) {
+    window.showErrorMessage("工作区不能为空");
+    return;
+  }
+  if (workspaceFolders.length > 1) {
+    window.showWarningMessage("当前工作区有多个项目，默认选择第一个项目");
+  }
   try {
-    const configPath = workspace.rootPath + "/" + "easy-component.config.js";
+    const configPath =
+      workspaceFolders[0].uri.fsPath + "/" + "easy-component.config.js";
     // use commonjs to load config
-    config = require(configPath);
+    configFunc = require(configPath);
+    if (typeof configFunc !== "function") {
+      throw new Error("easy-component.config.js输出的不是一个函数");
+    }
   } catch (e) {
-    onMissingConfigFile(e);
+    onConfigFileError(e);
     return;
   }
 
   // show input
   const fileName = await window.showInputBox({
-    placeHolder: "会替换配置文件的{{Name}}",
-    prompt: "输入组件的名字"
+    placeHolder: "会根据项目根目录的easy-component.config.js来生成文件",
+    prompt: "输入组件的名字",
   });
 
   // if the user's input is not empty or canceled

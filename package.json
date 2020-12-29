@@ -2,14 +2,14 @@
   "name": "easy-component",
   "displayName": "easy-component",
   "description": "be easy to create your component structrue",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "engines": {
-    "vscode": "^1.41.0"
+    "vscode": ">=1.41.0"
   },
   "categories": [
     "Other"
   ],
-  "publisher":"zem",
+  "publisher": "zem",
   "activationEvents": [
     "onCommand:extension.createComponent"
   ],
@@ -25,7 +25,7 @@
     "commands": [
       {
         "command": "extension.createComponent",
-        "title": "Create Component Structure"
+        "title": "Easy Create Component"
       }
     ]
   },
@@ -33,9 +33,7 @@
     "vscode:prepublish": "npm run compile",
     "vsce:publish": "vsce publish",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile",
-    "test": "node ./out/test/runTest.js"
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

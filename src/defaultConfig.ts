@@ -1,9 +1,12 @@
 export default `
-// easy-component, a vscode extension, works for crease coding efficience.
+/**
+ * easy-component, a vscode extension, works for increase coding efficience.
+ * if you modify this file, you need to reload your vscode window.
+ * */
 
-const jsContent = \`import React from 'react';
+const generateJsText = (ComponentName) => \`import React from 'react';
 
-class {{Name}} extends React.Component {
+class \${ComponentName} extends React.Component {
   render() {
     return (
       <div>hello world</div>
@@ -11,27 +14,27 @@ class {{Name}} extends React.Component {
   }
 }
 
-export default {{Name}};
+export default \${ComponentName};
 \`;
 
-const cssContent = \`.root{
+const generateCssText = (ComponentName) => \`.root{
   // some styles
 }
 \`;
 
-const indexContent = \`import {{Name}} from './{{Name}}';
+const generateIndexText = (ComponentName) =>  \`import \${ComponentName} from './\${ComponentName}';
 
-export default {{Name}};
+export default \${ComponentName};
 \`;
 
-module.exports = {
+module.exports = (ComponentName) => ({
   // {{Name}}是你在vscode输入框的输入值
-  '{{Name}}': {
-    '{{Name}}.jsx': jsContent, // 配置你的js文件内容
-    '{{Name}}.scss': cssContent, // 配置你的css文件内容
-    'index.js': indexContent, // Component entry
+  [ComponentName]: {
+    [\`\${ComponentName}.jsx\`]: generateJsText(ComponentName), // 配置你的js文件内容
+    [\`\${ComponentName}.scss\`]: generateCssText(ComponentName), // 配置你的css文件内容
+    'index.js': generateIndexText(ComponentName), // Component entry
   },
-};
+});
 `;
 
 /*

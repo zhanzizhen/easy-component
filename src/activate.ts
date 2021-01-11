@@ -1,11 +1,13 @@
 import * as vscode from "vscode";
 import defaultConfigStr from "./defaultConfig";
 
+const CONFIG_FILE_PATH = ".vscode/easy-component.js";
+
 const { workspace, Uri, window } = vscode;
 // user's input name
 let componentName = "";
 type Config = { [key: string]: string | ((v: string) => string) | Config };
-// easy-component.config.js
+// easy-component.js
 let configFunc: (v: string) => Config;
 // the first file we create
 let firstFileUri: vscode.Uri;
@@ -14,7 +16,7 @@ function transStrToUnit8(value: string): Uint8Array {
   return new Uint8Array(Buffer.from(value));
 }
 
-function resolvePath(fileName: string): vscode.Uri | never {
+function resolveRootPath(fileName: string): vscode.Uri | never {
   const { workspaceFolders } = workspace;
   if (workspaceFolders === undefined) {
     window.showErrorMessage("工作区不能为空");
@@ -30,7 +32,7 @@ async function parseObject(obj: Config, prePath: string) {
   for (const [key, value] of entries) {
     const pathName = prePath + "/" + key;
     if (typeof value === "function" || typeof value === "string") {
-      const fileUri = resolvePath(pathName);
+      const fileUri = resolveRootPath(pathName);
       const data = transStrToUnit8(
         typeof value === "function" ? getFileContentByFunction(value) : value
       );
@@ -51,12 +53,12 @@ function getFileContentByFunction(fn: (v: string) => string): string {
 async function onConfigFileError(e: any) {
   // easy-component.config is not found
   if (e.code === "MODULE_NOT_FOUND") {
-    const fileUri = resolvePath("easy-component.config.js");
+    const fileUri = resolveRootPath(CONFIG_FILE_PATH);
     await workspace.fs.writeFile(fileUri, transStrToUnit8(defaultConfigStr));
     await window.showTextDocument(fileUri, {
       preserveFocus: true,
     });
-    window.showErrorMessage("请先配置easy-component.config.js");
+    window.showErrorMessage("请先配置easy-component.js");
   } else {
     window.showErrorMessage(e.message);
   }
@@ -84,12 +86,11 @@ async function handleAfterRegisterCommand() {
     window.showWarningMessage("当前工作区有多个项目，默认选择第一个项目");
   }
   try {
-    const configPath =
-      workspaceFolders[0].uri.fsPath + "/" + "easy-component.config.js";
+    const configPath = workspaceFolders[0].uri.fsPath + "/" + CONFIG_FILE_PATH;
     // use commonjs to load config
     configFunc = require(configPath);
     if (typeof configFunc !== "function") {
-      throw new Error("easy-component.config.js输出的不是一个函数");
+      throw new Error("easy-component.js输出的不是一个函数");
     }
   } catch (e) {
     onConfigFileError(e);
@@ -98,7 +99,7 @@ async function handleAfterRegisterCommand() {
 
   // show input
   const fileName = await window.showInputBox({
-    placeHolder: "会根据项目根目录的easy-component.config.js来生成文件",
+    placeHolder: `会根据${CONFIG_FILE_PATH}来生成文件`,
     prompt: "输入组件的名字",
   });
 

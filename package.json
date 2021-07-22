@@ -2,7 +2,7 @@
   "name": "easy-component",
   "displayName": "easy-component",
   "description": "be easy to create your component structrue",
-  "version": "2.0.1",
+  "version": "2.1.1",
   "engines": {
     "vscode": ">=1.41.0"
   },
@@ -32,8 +32,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "vsce:publish": "vsce publish",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "compile": "tsc -p ./"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

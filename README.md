@@ -16,7 +16,25 @@ Zh: React 或者 Vue 的开发过程中，为了组件的可维护和可复用�
 
 它提供一个模板配置文件`easy-component.js`，位于根目录。你可以配置你想要的生成结果，然后通过 `ctrl + shift + p` 调用`Easy Create Component`命令来生成组件文件。
 
-`easy-component.js`输出一个函数，函数的参数是当前你输入的组件名: string，你可以在函数内自定义组件的生成逻辑。
+`easy-component.js`的输出可以是：
+
+1. 输出一个函数 `Creator`，函数的参数是当前你输入的组件名: string，你可以在函数内自定义组件的生成逻辑。函数的类型如下：
+
+```ts
+interface FileStructure {
+  [dirName: string]: string | ((v: string) => string) | FileStructure;
+}
+
+type Creator = (inputName: string) => FileStructure;
+```
+
+2. 若你想使用多模板，也可以输出一个数组。数组的类型如下：(since v2.1.0)
+
+```ts
+[{ label: string; creator: Creator }]
+```
+
+使用示例：
 
 ![guide gif](https://user-images.githubusercontent.com/22932241/104184497-8033e900-544e-11eb-94b8-110edb42236b.gif)
 
@@ -67,3 +85,7 @@ relase the first stable version
 
 1. 把 easy-component.config.js 改名为 easy-component.js
 2. easy-component.js 从根目录调整为.vscode 目录
+
+### 2.1.0
+
+1. easy-component.js 支持输出数组，从而支持多模板

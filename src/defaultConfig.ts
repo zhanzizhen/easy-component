@@ -4,9 +4,9 @@ export default `
  * if you modify this file, you need to reload your vscode window.
  * */
 
-const generateJsText = (ComponentName) => \`import React from 'react';
+const generateJs = (Name) => \`import React from 'react';
 
-class \${ComponentName} extends React.Component {
+export default class \${Name} extends React.Component {
   render() {
     return (
       <div>hello world</div>
@@ -14,27 +14,39 @@ class \${ComponentName} extends React.Component {
   }
 }
 
-export default \${ComponentName};
 \`;
 
-const generateCssText = (ComponentName) => \`.root{
+const generateCss = (Name) => \`.root{
   // some styles
 }
 \`;
 
-const generateIndexText = (ComponentName) =>  \`import \${ComponentName} from './\${ComponentName}';
+const generateIndex = (Name) =>  \`import \${Name} from './\${Name}';
 
-export default \${ComponentName};
+export default \${Name};
 \`;
 
-module.exports = (ComponentName) => ({
-  // {{Name}}是你在vscode输入框的输入值
-  [ComponentName]: {
-    [\`\${ComponentName}.jsx\`]: generateJsText(ComponentName), // 配置你的js文件内容
-    [\`\${ComponentName}.scss\`]: generateCssText(ComponentName), // 配置你的css文件内容
-    'index.js': generateIndexText(ComponentName), // Component entry
+module.exports = [
+  {
+    label: '模板1',
+    creator: (Name) => ({
+      // {{Name}}是你在vscode输入框的输入值
+      [Name]: {
+        [\`\${Name}.jsx\`]: generateJs(Name), // 配置你的js文件内容
+        [\`\${Name}.scss\`]: generateCss(Name), // 配置你的css文件内容
+        'index.js': generateIndex(Name), // Component entry
+      },
+    })
   },
-});
+  {
+    label: '模板2',
+    creator: (Name)=>({
+      [Name]: {
+        [\`\${Name}.txt\`]: 'hello world'
+      }
+    })
+  }
+];
 `;
 
 /*

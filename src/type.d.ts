@@ -1,6 +1,6 @@
 /**  */
 interface FileStructure {
-  [dirName: string]: string | ((v: string) => string) | FileStructure;
+  [dirName: string]: string | FileStructure;
 }
 
 type Creator = (inputName: string) => FileStructure;
